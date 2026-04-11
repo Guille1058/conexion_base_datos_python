@@ -1,6 +1,8 @@
 import pymysql
 import keyboard
 import os
+import pandas
+from tabulate import tabulate 
 import ctypes
 import platform
 
@@ -92,6 +94,8 @@ try:
         print("------------------------")
         print("*** Datos insertados correctamente ***")
         print("------------------------")
+        dataframe = pandas.read_sql("SELECT * FROM Gente", conexion)
+        print(tabulate(dataframe, headers='keys', tablefmt='grid'))
         contador+=1
 
 except Exception as err:
