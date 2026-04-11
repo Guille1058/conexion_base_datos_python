@@ -31,8 +31,8 @@ def salir_emergencia():
 
 def creacion_bbdd(cursor):
     # Crear y usar la base de datos
-    cursor.execute("CREATE DATABASE IF NOT EXISTS base_de_datos")
-    cursor.execute("USE base_de_datos")
+    cursor.execute("CREATE DATABASE IF NOT EXISTS alumnos_eig")
+    cursor.execute("USE alumnos_eig")
 
     # Crear tabla
     cursor.execute("""
