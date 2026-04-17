@@ -8,9 +8,9 @@ import platform
 
 def main_loop(cursor, conexion):
     while True:
-        flujo = int(input("Selecciona una opción de entre las siguientes para continuar:\n 1.- Insertar datos en una tabla. \n 2.- Mostrar datos de una tabla. \n 3.- Actualizar datos de una tabla. \n 4.- Borrar datos de una tabla. \n 5.- Crear una nueva tabla. \n 6.- Salir. \n->"))
-        if flujo < 1 or flujo > 6:
-            print("¡¡ERROR!! (VALOR NO VALIDO) -- Selecciona una opción de entre las siguientes para continuar:\n 1.- Insertar datos en una tabla. \n 2.- Mostrar datos de una tabla. \n 3.- Actualizar datos de una tabla. \n 4.- Borrar datos de una tabla. \n 5.- Crear una nueva tabla. \n 6.- Salir.")
+        flujo = int(input("Selecciona una opción de entre las siguientes para continuar:\n 1.- Insertar datos en una tabla. \n 2.- Mostrar datos de una tabla. \n 3.- Actualizar datos de una tabla. \n 4.- Borrar datos de una tabla. \n 5.- Crear una nueva tabla. \n 6.- Crear una nueva base de datos. \n 7.- Borrar una base de datos. \n 8.- Salir. \n-> "))
+        if flujo < 1 or flujo > 8:
+            print("¡¡ERROR!! (VALOR NO VALIDO) -- Selecciona una opción de entre las siguientes para continuar:\n 1.- Insertar datos en una tabla. \n 2.- Mostrar datos de una tabla. \n 3.- Actualizar datos de una tabla. \n 4.- Borrar datos de una tabla. \n 5.- Crear una nueva tabla. \n 6.- Crear una nueva base de datos. \n 7.- Borrar una base de datos. \n 8.- Salir.")
         else:
             menu_principal(flujo, cursor, conexion)
 
@@ -45,9 +45,9 @@ def menu_principal(opcion, cursor, conexion):
             repite = True
             while repite:
                 nombre_tabla = input("Introduce el nombre de la tabla a actualizar -> ")
-                clave = input("Introduce el nombre del campo a actualizar -> ")
-                valor = input("Introduce el nuevo valor del campo a actualizar -> ")
-                cursor.execute(f"UPDATE {nombre_tabla} SET {clave} = {valor}")
+                clave = input("Campo a actualizar -> ")
+                valor = input("Nuevo valor -> ")
+                cursor.execute(f"UPDATE {nombre_tabla} SET {clave} = %s", (valor,))
                 conexion.commit()
                 output = input("¿Desea actualizar otro campo? (S/N) -> ")
                 if output.upper() == "N":
@@ -56,52 +56,69 @@ def menu_principal(opcion, cursor, conexion):
         case 4:
             repite = True
             while repite:
-                prompt = int(input("Qué quieres borrar en específico? (1.- Borrar toda la tabla / 2.- Borrar una columna completa / 3.- Borrar una base de datos completa)"))
+                prompt = int(input("Qué quieres borrar en específico? (1.- Borrar toda la tabla / 2.- Borrar una columna completa) -> "))
                 match prompt:
                     case 1:
                         nombre_tabla = input("Introduce el nombre de la tabla a borrar -> ")
-                        cursor.execute(f"DELETE FROM {nombre_tabla}")
+                        cursor.execute(f"DROP TABLE {nombre_tabla}")
                     case 2:
                         nombre_tabla = input("Introduce el nombre de la tabla afectada -> ")
                         clave = input("Introduce el nombre de la columna a borrar -> ")
                         cursor.execute(f"ALTER TABLE {nombre_tabla} DROP COLUMN {clave}")
-                    case 3:
-                        nombre_bbdd = input("Introduce el nombre de la base de datos a borrar -> ")
-                        cursor.execute(f"DROP DATABASE IF EXISTS {nombre_bbdd}")
                 conexion.commit()
                 output = input("¿Desea borrar otro campo? (S/N) -> ")
                 if output.upper() == "N":
                     repite = False
             return
         case 5:
-            # Crear y usar la base de datos
             repite = True
+            i = 0
+            j = 0
             while repite:
-                nombre_bbdd = input("Introduce el nombre de la base de datos a crear -> ")
-                cursor.execute(f"CREATE DATABASE IF NOT EXISTS {nombre_bbdd}")
-                cursor.execute(f"USE {nombre_bbdd}")
-                i = 0
                 num_tablas = int(input("¿Cuántas tablas deseas crear en la base de datos? (Deben ser entre 1 y 10) -> "))
                 while num_tablas < 0 or num_tablas > 10:
                     num_tablas = int(input("¡¡ERROR!! (VALOR NO VALIDO) -- ¿Cuántas tablas deseas crear en la base de datos? (Deben ser entre 1 y 10) -> "))
                 while i < num_tablas:
+                    j = 0
                     nombre_tabla = input("Introduce el nombre de la tabla a crear -> ")
                     cursor.execute(f"CREATE TABLE IF NOT EXISTS {nombre_tabla} (id INT AUTO_INCREMENT PRIMARY KEY)")
+                    num_registros = int(input("¿Cuántos registros deseas insertar en la tabla? (Deben ser entre 1 y 100)-> "))
+                    while num_registros < 0 or num_registros > 50:
+                        num_registros = int(input("¡¡ERROR!! (VALOR NO VALIDO) -- ¿Cuántos registros deseas insertar en la tabla? (Deben ser entre 1 y 100)-> "))
+                    while j < num_registros:
+                        clave = input("Introduce el nombre del campo a insertar -> ")
+                        cursor.execute(f"ALTER TABLE {nombre_tabla} ADD {clave} VARCHAR(255)")
+                        print(f"Campo {clave} añadido correctamente a la tabla {nombre_tabla}.")
+                        while True:
+                            valor = input(f"Introduce el valor del campo {clave} para el registro {i+1} -> ")
+                            if len(valor) > 255:
+                                print("¡¡ERROR!! (VALOR NO VALIDO) -- El valor no puede tener más de 255 caracteres, vuelve a intentarlo.")
+                            else:
+                                break
+                        cursor.execute(f"INSERT INTO {nombre_tabla} ({clave}) VALUES (%s)",( valor,))
+                        print(f"Registro {i+1} insertado correctamente en la tabla {nombre_tabla}.")
+                        j += 1
                     i += 1
-                num_registros = int(input("¿Cuántos registros deseas insertar en la tabla? (Deben ser entre 1 y 100)-> "))
-                while num_registros < 0 or num_registros > 50:
-                    num_registros = int(input("¡¡ERROR!! (VALOR NO VALIDO) -- ¿Cuántos registros deseas insertar en la tabla? (Deben ser entre 1 y 100)-> "))
-                i = 0
-                while i < num_registros:
-                    clave = input("Introduce el nombre del campo a insertar -> ")
-                    cursor.execute(f"ALTER TABLE {nombre_tabla} ADD {clave} VARCHAR(255)")
-                    i += 1
+                output = input("¿Desea crear otra tabla? (S/N) -> ")
                 conexion.commit()
-                output = input("¿Desea crear otra base de datos? (S/N) -> ")
                 if output.upper() == "N":
                     repite = False
             return
+    
         case 6:
+            nombre_bbdd = input("Introduce el nombre de la base de datos a crear -> ")
+            cursor.execute(f"CREATE DATABASE IF NOT EXISTS {nombre_bbdd}")
+            cursor.execute(f"USE {nombre_bbdd}")
+            conexion.commit()
+            return print(f"Base de datos {nombre_bbdd} creada y seleccionada correctamente.")
+        
+        case 7:
+            nombre_bbdd = input("Introduce el nombre de la base de datos a borrar -> ")
+            cursor.execute(f"DROP DATABASE IF EXISTS {nombre_bbdd}")
+            conexion.commit()
+            return print(f"Base de datos {nombre_bbdd} borrada correctamente.")              
+
+        case 8:
             print("Saliendo del programa...")
             conexion.close()
             print("Conexión cerrada")
@@ -146,13 +163,14 @@ try:
     )
     print("Conexión correcta")
     cursor = conexion.cursor()
-    cursor.execute("CREATE DATABASE IF NOT EXISTS eig_alumnos")
+    cursor.execute("DROP DATABASE IF EXISTS eig_alumnos")
+    cursor.execute("CREATE DATABASE eig_alumnos")
     cursor.execute("USE eig_alumnos")
     cursor.execute("""CREATE TABLE IF NOT EXISTS Gente (
                         id INT AUTO_INCREMENT PRIMARY KEY,
                         nombre VARCHAR(50) DEFAULT 'Sin nombre',
                         apellidos VARCHAR(50) DEFAULT 'Sin apellidos',
-                        contraseña VARCHAR(10) DEFAULT 'Sin contraseña',
+                        contraseña VARCHAR(10) DEFAULT 'Sin pass',
                         perfil VARCHAR(30) DEFAULT 'Sin perfil'
                     )""")
     print("Base de datos por defecto creada y seleccionada correctamente -- /eig_alumnos/ --")
