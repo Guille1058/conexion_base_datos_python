@@ -72,13 +72,17 @@ def menu_principal(opcion, cursor, conexion):
             return
         case 5:
             repite = True
-            i = 0
-            j = 0
             while repite:
+                vector_claves = []
+                vector_valores = []
+                i = 0
                 num_tablas = int(input("¿Cuántas tablas deseas crear en la base de datos? (Deben ser entre 1 y 10) -> "))
                 while num_tablas < 0 or num_tablas > 10:
                     num_tablas = int(input("¡¡ERROR!! (VALOR NO VALIDO) -- ¿Cuántas tablas deseas crear en la base de datos? (Deben ser entre 1 y 10) -> "))
                 while i < num_tablas:
+                    contador = 0
+                    vector_claves = []
+                    vector_valores = []
                     j = 0
                     nombre_tabla = input("Introduce el nombre de la tabla a crear -> ")
                     cursor.execute(f"CREATE TABLE IF NOT EXISTS {nombre_tabla} (id INT AUTO_INCREMENT PRIMARY KEY)")
@@ -87,20 +91,23 @@ def menu_principal(opcion, cursor, conexion):
                         num_registros = int(input("¡¡ERROR!! (VALOR NO VALIDO) -- ¿Cuántos registros deseas insertar en la tabla? (Deben ser entre 1 y 100)-> "))
                     while j < num_registros:
                         clave = input("Introduce el nombre del campo a insertar -> ")
+                        vector_claves.append(clave)
                         cursor.execute(f"ALTER TABLE {nombre_tabla} ADD {clave} VARCHAR(255)")
+                        conexion.commit()
                         print(f"Campo {clave} añadido correctamente a la tabla {nombre_tabla}.")
-                        while True:
-                            valor = input(f"Introduce el valor del campo {clave} para el registro {i+1} -> ")
-                            if len(valor) > 255:
-                                print("¡¡ERROR!! (VALOR NO VALIDO) -- El valor no puede tener más de 255 caracteres, vuelve a intentarlo.")
-                            else:
-                                break
-                        cursor.execute(f"INSERT INTO {nombre_tabla} ({clave}) VALUES (%s)",( valor,))
-                        print(f"Registro {i+1} insertado correctamente en la tabla {nombre_tabla}.")
                         j += 1
+                        valor = input(f"Introduce el valor del campo {clave} para el registro {i+1} -> ")
+                        while len(valor) > 255:
+                            print("¡¡ERROR!! (VALOR NO VALIDO) -- El valor no puede tener más de 255 caracteres, vuelve a intentarlo.")
+                            valor = input(f"Introduce el valor del campo {clave} para el registro {i+1} -> ")
+                        vector_valores.append(valor)
+                    arr_claves_tostring =  ", ".join(vector_claves)
+                    arr_valores_tostring =  "', '".join(vector_valores)
+                    cursor.execute(f"INSERT INTO {nombre_tabla} ({arr_claves_tostring}) VALUES ('{arr_valores_tostring}')")
+                    conexion.commit()
+                    print(f"Registro {contador+1} insertado correctamente en la tabla {nombre_tabla}.")
                     i += 1
                 output = input("¿Desea crear otra tabla? (S/N) -> ")
-                conexion.commit()
                 if output.upper() == "N":
                     repite = False
             return
