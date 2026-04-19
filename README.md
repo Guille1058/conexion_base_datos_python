@@ -1,80 +1,137 @@
-# Student Management Database System
+# 🗄️ Gestor de Bases de Datos en Python (DBMS CLI)
 
-A Python-based CLI application that automates the creation of a MySQL database and manages user/student records. The script features administrative privilege checks, real-time data visualization using Pandas, and an emergency exit hotkey.
+Este proyecto es una aplicación de línea de comandos (CLI) desarrollada en Python que permite gestionar bases de datos MySQL de forma interactiva. Incluye funcionalidades completas de administración como inserción, consulta, actualización y eliminación de datos, así como la creación y eliminación de bases de datos y tablas.
 
-## 🚀 Features
+---
 
-* **Automatic Database Setup**: Creates the `alumnos_eig` database and the `Gente` table automatically if they don't exist.
-* **Admin Shield**: Built-in check to ensure the script runs with Administrator (Windows) or Sudo (Linux/macOS) privileges.
-* **Emergency Exit**: Immediate program termination by pressing the `ESC` key.
-* **Data Validation**: Strict input length validation for all user fields.
-* **Visual Reports**: Real-time display of the database content in a clean, formatted grid using `pandas` and `tabulate`.
+## 🚀 Características
 
-## 🛠️ Prerequisites
+* 📥 Insertar datos en tablas
+* 📊 Mostrar datos en formato tabla
+* ✏️ Actualizar registros existentes
+* 🗑️ Borrar tablas o columnas
+* 🏗️ Crear nuevas tablas dinámicamente
+* 🧱 Crear y eliminar bases de datos
+* 💻 Ejecutar consultas SQL personalizadas
+* ⛔ Salida de emergencia con tecla `ESC`
+* 🔐 Requiere permisos de administrador/root
 
-Before running the application, ensure you have the following installed:
+---
 
-1.  **Python 3.x**
-2.  **MySQL Server** (e.g., XAMPP, WAMP, or a standalone MySQL installation) running on `localhost:3306`.
-3.  **Administrative Privileges**: Necessary for the `keyboard` library to intercept the hotkey.
+## 🧰 Tecnologías utilizadas
 
-## 📦 Installation
+* Python 3
+* MySQL
+* Librerías:
 
-1. **Clone the repository** (or download the source code):
-   ```bash
-   git clone <your-repository-link>
-   cd <project-folder>
+  * `pymysql`
+  * `pandas`
+  * `tabulate`
+  * `keyboard`
+  * `ctypes`
+  * `platform`
 
-    Create and activate a virtual environment:
-   ```
-   ```bash
-    # Linux/macOS
-    python3 -m venv .venv
-    source .venv/bin/activate
+---
 
-    # Windows
-    python -m venv .venv
-    .venv\Scripts\activate
-    ```
-   
-2. **Install dependencies**:
-   
-   ```bash
-    pip install -r requirements.txt
-   ```
+## 📦 Instalación
 
-🚦 Usage
+1. Clona este repositorio:
 
-    Start your local MySQL server.
+```bash
+git clone https://github.com/tu-usuario/tu-repo.git
+cd tu-repo
+```
 
-    Run the script with Administrative/Sudo privileges:
-    
-   ```bash
-    # Linux/macOS
-    sudo .venv/bin/python main.py
+2. Instala las dependencias necesarias:
 
-    # Windows (Run PowerShell/CMD as Admin)
-    python main.py
-   ```
+```bash
+pip install pymysql pandas tabulate keyboard
+```
 
-    Follow the on-screen prompts to enter the number of users and their details.
+3. Asegúrate de tener MySQL en ejecución.
 
-    Press ESC at any time to force-close the application safely.
+---
 
-📋 Requirements
+## ⚙️ Configuración
 
-The project relies on the following libraries:
+Edita los parámetros de conexión en el código si es necesario:
 
-    pymysql: Database connection.
+```python
+conexion = pymysql.connect(
+    host="localhost",
+    user="root",
+    password="",
+    port=3306
+)
+```
 
-    pandas: Data manipulation.
+---
 
-    tabulate: Table formatting in the console.
+## ▶️ Uso
 
-    keyboard: Global hotkey detection.
+Ejecuta el script como administrador/root:
 
-⚠️ Important Notes
+```bash
+python nombre_del_script.py
+```
 
-    Database Credentials: By default, the script connects to localhost using user root with no password. If your configuration is different, please update the pymysql.connect parameters in main.py.
+Al iniciar, verás un menú interactivo con las siguientes opciones:
 
-    Keyboard Library: This library requires root/admin access because it listens to hardware events globally.
+```
+1.- Insertar datos
+2.- Mostrar datos
+3.- Actualizar datos
+4.- Borrar datos
+5.- Crear tabla
+6.- Crear base de datos
+7.- Borrar base de datos
+8.- Ejecutar SQL personalizado
+9.- Salir
+```
+
+Puedes presionar `ESC` en cualquier momento para salir de forma segura.
+
+---
+
+## 🧪 Base de datos por defecto
+
+El programa crea automáticamente:
+
+* Base de datos: `eig_alumnos`
+* Tabla: `Gente`
+
+Estructura:
+
+| id | nombre | apellidos | contraseña | perfil |
+| -- | ------ | --------- | ---------- | ------ |
+
+---
+
+## ⚠️ Consideraciones importantes
+
+* ⚡ Ejecutar como administrador o con `sudo`
+* ⚠️ No hay validación contra inyección SQL en entradas personalizadas
+* 🔒 Uso recomendado en entornos de desarrollo o aprendizaje
+* 💾 Asegúrate de tener backups si trabajas con datos reales
+
+---
+
+## 🛠️ Posibles mejoras
+
+* Interfaz gráfica (GUI)
+* Validación de entradas más robusta
+* Soporte para múltiples usuarios
+* Logs de operaciones
+* ORM (como SQLAlchemy)
+
+---
+
+## 📄 Licencia
+
+Este proyecto es de uso libre para fines educativos.
+
+---
+
+## 👨‍💻 Autor
+
+Desarrollado como proyecto de aprendizaje en gestión de bases de datos con Python y MySQL.
