@@ -8,13 +8,18 @@ import platform
 
 def main_loop(cursor, conexion):
     while True:
-        flujo = int(input("Selecciona una opción de entre las siguientes para continuar:\n 1.- Insertar datos en una tabla. \n 2.- Mostrar datos de una tabla. \n 3.- Actualizar datos de una tabla. \n 4.- Borrar datos de una tabla. \n 5.- Crear una nueva tabla. \n 6.- Crear una nueva base de datos. \n 7.- Borrar una base de datos. \n 8.- Salir. \n-> "))
-        if flujo < 1 or flujo > 8:
-            print("¡¡ERROR!! (VALOR NO VALIDO) -- Selecciona una opción de entre las siguientes para continuar:\n 1.- Insertar datos en una tabla. \n 2.- Mostrar datos de una tabla. \n 3.- Actualizar datos de una tabla. \n 4.- Borrar datos de una tabla. \n 5.- Crear una nueva tabla. \n 6.- Crear una nueva base de datos. \n 7.- Borrar una base de datos. \n 8.- Salir.")
+        flujo = int(input("Selecciona una opción de entre las siguientes para continuar:\n 1.- Insertar datos en una tabla. \n 2.- Mostrar datos de una tabla. \n 3.- Actualizar datos de una tabla. \n 4.- Borrar datos de una tabla. \n 5.- Crear una nueva tabla. \n 6.- Crear una nueva base de datos. \n 7.- Borrar una base de datos. \n 8.- Inyectar SQL personalizado. \n 9.- Salir. \n-> "))
+        if flujo < 1 or flujo > 9:
+            print("¡¡ERROR!! (VALOR NO VALIDO) -- Selecciona una opción de entre las siguientes para continuar:\n 1.- Insertar datos en una tabla. \n 2.- Mostrar datos de una tabla. \n 3.- Actualizar datos de una tabla. \n 4.- Borrar datos de una tabla. \n 5.- Crear una nueva tabla. \n 6.- Crear una nueva base de datos. \n 7.- Borrar una base de datos. \n 8.- Inyectar SQL personalizado. \n 9.- Salir. \n-> ")
         else:
             menu_principal(flujo, cursor, conexion)
 
 def menu_principal(opcion, cursor, conexion):
+    if opcion == 9:
+        print("Saliendo del programa...")
+        conexion.close()
+        print("Conexión cerrada")
+        os._exit(0)
     print("Presiona 'ESC' en cualquier momento para salir del programa de forma segura.")
     prompt = input("Seleccione la base de datos a usar -> ")
     cursor.execute(f"USE {prompt}")
@@ -47,7 +52,9 @@ def menu_principal(opcion, cursor, conexion):
                 nombre_tabla = input("Introduce el nombre de la tabla a actualizar -> ")
                 clave = input("Campo a actualizar -> ")
                 valor = input("Nuevo valor -> ")
-                cursor.execute(f"UPDATE {nombre_tabla} SET {clave} = %s", (valor,))
+                nombre_campo_id = input("Introduce el nombre del campo ID -> ")
+                id_campo = int(input("Indica el ID del campo -> "))
+                cursor.execute(f"UPDATE {nombre_tabla} SET {clave} = %s WHERE {nombre_campo_id} = %s", (valor, id_campo))
                 conexion.commit()
                 output = input("¿Desea actualizar otro campo? (S/N) -> ")
                 if output.upper() == "N":
@@ -113,24 +120,23 @@ def menu_principal(opcion, cursor, conexion):
             return
     
         case 6:
-            nombre_bbdd = input("Introduce el nombre de la base de datos a crear -> ")
+            nombre_bbdd = input("CONFIRMA el nombre de la base de datos a crear -> ")
             cursor.execute(f"CREATE DATABASE IF NOT EXISTS {nombre_bbdd}")
             cursor.execute(f"USE {nombre_bbdd}")
             conexion.commit()
             return print(f"Base de datos {nombre_bbdd} creada y seleccionada correctamente.")
         
         case 7:
-            nombre_bbdd = input("Introduce el nombre de la base de datos a borrar -> ")
+            nombre_bbdd = input("CONFIRMA el nombre de la base de datos a borrar -> ")
             cursor.execute(f"DROP DATABASE IF EXISTS {nombre_bbdd}")
             conexion.commit()
             return print(f"Base de datos {nombre_bbdd} borrada correctamente.")              
 
         case 8:
-            print("Saliendo del programa...")
-            conexion.close()
-            print("Conexión cerrada")
-            os._exit(0)
-        
+            inyeccion_sql = input("INSERTA LA ORDEN SQL RESPETANDO LAS NORMAS DE SINTÁXIS \n -> ")
+            cursor.execute(f"{inyeccion_sql}")
+            conexion.commit()
+            return print(f"¡Operación realizada con éxito! - Puedes comprobar el estado de la tabla accediendo a la opción 2 de este menú.")    
 
 def es_administrador():
     try:
@@ -170,7 +176,6 @@ try:
     )
     print("Conexión correcta")
     cursor = conexion.cursor()
-    cursor.execute("DROP DATABASE IF EXISTS eig_alumnos")
     cursor.execute("CREATE DATABASE eig_alumnos")
     cursor.execute("USE eig_alumnos")
     cursor.execute("""CREATE TABLE IF NOT EXISTS Gente (
