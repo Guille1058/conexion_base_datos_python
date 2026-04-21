@@ -33,17 +33,26 @@ def menu_principal(opcion, cursor, conexion):
     try:
         match opcion:
             case 1:
-                repite = True
-                while repite:
-                    nombre_tabla = input("Introduce el nombre de la tabla a insertar datos -> ")
-                    clave = input("Posicionate sobre el campo afectado -> ")
-                    valor = input("Introduce el valor del campo a insertar -> ")
-                    cursor.execute(f"INSERT INTO {nombre_tabla} ({clave}) VALUES (%s)",(valor,))
+                try:
+                    nombre_tabla = input("Introduce el nombre de la tabla -> ")
+                    cursor.execute(f"DESCRIBE {nombre_tabla}")
+                    columnas_db = cursor.fetchall()
+                    columnas = [col[0] for col in columnas_db if col[0] != "id"]  # Quitamos el id si es AUTO_INCREMENT
+                    print(f"Columnas detectadas: {columnas}")
+                    valores = []
+                    for col in columnas:
+                        valor = input(f"Introduce el valor para '{col}' -> ")
+                        valores.append(valor)
+                    placeholders = ", ".join(["%s"] * len(valores))
+                    columnas_sql = ", ".join(columnas)
+                    sql = f"INSERT INTO {nombre_tabla} ({columnas_sql}) VALUES ({placeholders})"
+                    cursor.execute(sql, valores)
                     conexion.commit()
-                    output = input("¿Desea insertar otro campo? (S/N) -> ")
-                    if output.upper() == "N":
-                        repite = False
-                return
+                    print("Registro insertado correctamente.")
+                except pymysql.err.ProgrammingError as err:
+                    print(f"Error de SQL: {err}")
+                except Exception as err:
+                    print(f"Error inesperado: {err}")
             case 2:
                 repite = True
                 while repite:
@@ -197,8 +206,8 @@ try:
     )
     print("Conexión correcta")
     cursor = conexion.cursor()
+    cursor.execute("CREATE DATABASE IF NOT EXISTS eig_alumnos")
     try:
-        cursor.execute("CREATE DATABASE eig_alumnos")
         cursor.execute("USE eig_alumnos")
     except pymysql.MySQLError as err:
         print(f"No se pudo crear y seleccionar la base de datos... Inténtelo más tarde. {err}")
